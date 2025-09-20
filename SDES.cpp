@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
 // Initialize static permutation tables
 const int SDES::P10[10] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
 const int SDES::P8[8] = {6, 3, 7, 4, 8, 5, 10, 9};
@@ -26,20 +28,20 @@ const int SDES::S1[4][4] = {
     {2, 1, 0, 3}
 };
 
-SDES::SDES(const std::bitset<10>& key) : masterKey(key) {
+SDES::SDES(const bitset<10>& key) : masterKey(key) {
     generateSubkeys();
 }
 
-std::bitset<10> SDES::permute10(const std::bitset<10>& input, const int* table) {
-    std::bitset<10> output;
+bitset<10> SDES::permute10(const bitset<10>& input, const int* table) {
+    bitset<10> output;
     for (int i = 0; i < 10; i++) {
         output[9-i] = input[10-table[i]];
     }
     return output;
 }
 
-std::bitset<8> SDES::permute8(const std::bitset<8>& input, const int* table) {
-    std::bitset<8> output;
+bitset<8> SDES::permute8(const bitset<8>& input, const int* table) {
+    bitset<8> output;
     for (int i = 0; i < 8; i++) {
         if (table == P8) {
             // For P8, we're working with a 10-bit input stored in 8-bit
@@ -52,35 +54,35 @@ std::bitset<8> SDES::permute8(const std::bitset<8>& input, const int* table) {
     return output;
 }
 
-std::bitset<8> SDES::permute8(const std::bitset<10>& input, const int* table) {
-    std::bitset<8> output;
+bitset<8> SDES::permute8(const bitset<10>& input, const int* table) {
+    bitset<8> output;
     for (int i = 0; i < 8; i++) {
         output[7-i] = input[10-table[i]];
     }
     return output;
 }
 
-std::bitset<4> SDES::permute4(const std::bitset<4>& input, const int* table) {
-    std::bitset<4> output;
+bitset<4> SDES::permute4(const bitset<4>& input, const int* table) {
+    bitset<4> output;
     for (int i = 0; i < 4; i++) {
         output[3-i] = input[4-table[i]];
     }
     return output;
 }
 
-std::bitset<8> SDES::expandPermute(const std::bitset<4>& input) {
-    std::bitset<8> output;
+bitset<8> SDES::expandPermute(const bitset<4>& input) {
+    bitset<8> output;
     for (int i = 0; i < 8; i++) {
         output[7-i] = input[4-EP[i]];
     }
     return output;
 }
 
-std::bitset<10> SDES::leftShift(const std::bitset<10>& input, int positions) {
-    std::bitset<10> output = input;
+bitset<10> SDES::leftShift(const bitset<10>& input, int positions) {
+    bitset<10> output = input;
     
     // Split into two 5-bit halves
-    std::bitset<5> left, right;
+    bitset<5> left, right;
     
     // Extract left half (bits 9-5)
     for (int i = 0; i < 5; i++) {
@@ -113,34 +115,34 @@ std::bitset<10> SDES::leftShift(const std::bitset<10>& input, int positions) {
     return output;
 }
 
-std::bitset<2> SDES::sboxLookup(const std::bitset<4>& input, const int sbox[4][4]) {
+bitset<2> SDES::sboxLookup(const bitset<4>& input, const int sbox[4][4]) {
     int row = (input[3] << 1) | input[0];  // First and last bits
     int col = (input[2] << 1) | input[1];  // Middle two bits
     
     int value = sbox[row][col];
-    return std::bitset<2>(value);
+    return bitset<2>(value);
 }
 
-std::bitset<4> SDES::fFunction(const std::bitset<4>& right, const std::bitset<8>& subkey) {
+bitset<4> SDES::fFunction(const bitset<4>& right, const bitset<8>& subkey) {
     // Expansion/Permutation
-    std::bitset<8> expanded = expandPermute(right);
+    bitset<8> expanded = expandPermute(right);
     
     // XOR with subkey
     expanded ^= subkey;
     
     // Split into two 4-bit halves for S-boxes
-    std::bitset<4> left4, right4;
+    bitset<4> left4, right4;
     for (int i = 0; i < 4; i++) {
         left4[i] = expanded[i + 4];
         right4[i] = expanded[i];
     }
     
     // S-box substitution
-    std::bitset<2> s0_output = sboxLookup(left4, S0);
-    std::bitset<2> s1_output = sboxLookup(right4, S1);
+    bitset<2> s0_output = sboxLookup(left4, S0);
+    bitset<2> s1_output = sboxLookup(right4, S1);
     
     // Combine S-box outputs
-    std::bitset<4> combined;
+    bitset<4> combined;
     combined[3] = s0_output[1];
     combined[2] = s0_output[0];
     combined[1] = s1_output[1];
@@ -152,40 +154,40 @@ std::bitset<4> SDES::fFunction(const std::bitset<4>& right, const std::bitset<8>
 
 void SDES::generateSubkeys() {
     // Apply P10 permutation
-    std::bitset<10> permuted = permute10(masterKey, P10);
+    bitset<10> permuted = permute10(masterKey, P10);
     
     // Left shift by 1 for K1
-    std::bitset<10> shifted1 = leftShift(permuted, 1);
+    bitset<10> shifted1 = leftShift(permuted, 1);
     k1 = permute8(shifted1, P8);
     
     // Left shift by 2 more (total 3) for K2
-    std::bitset<10> shifted3 = leftShift(shifted1, 2);
+    bitset<10> shifted3 = leftShift(shifted1, 2);
     k2 = permute8(shifted3, P8);
 }
 
-std::bitset<8> SDES::encrypt(const std::bitset<8>& plaintext) {
+bitset<8> SDES::encrypt(const bitset<8>& plaintext) {
     // Initial permutation
-    std::bitset<8> permuted = permute8(plaintext, IP);
+    bitset<8> permuted = permute8(plaintext, IP);
     
     // Split into left and right halves
-    std::bitset<4> left, right;
+    bitset<4> left, right;
     for (int i = 0; i < 4; i++) {
         left[i] = permuted[i + 4];
         right[i] = permuted[i];
     }
     
     // Round 1: fK1
-    std::bitset<4> f_output = fFunction(right, k1);
-    std::bitset<4> new_right = left ^ f_output;
-    std::bitset<4> new_left = right;
+    bitset<4> f_output = fFunction(right, k1);
+    bitset<4> new_right = left ^ f_output;
+    bitset<4> new_left = right;
     
     // Round 2: fK2
     f_output = fFunction(new_right, k2);
-    std::bitset<4> final_left = new_left ^ f_output;
-    std::bitset<4> final_right = new_right;
+    bitset<4> final_left = new_left ^ f_output;
+    bitset<4> final_right = new_right;
     
     // Combine halves
-    std::bitset<8> combined;
+    bitset<8> combined;
     for (int i = 0; i < 4; i++) {
         combined[i + 4] = final_left[i];
         combined[i] = final_right[i];
@@ -195,29 +197,29 @@ std::bitset<8> SDES::encrypt(const std::bitset<8>& plaintext) {
     return permute8(combined, IP_INV);
 }
 
-std::bitset<8> SDES::decrypt(const std::bitset<8>& ciphertext) {
+bitset<8> SDES::decrypt(const bitset<8>& ciphertext) {
     // Initial permutation
-    std::bitset<8> permuted = permute8(ciphertext, IP);
+    bitset<8> permuted = permute8(ciphertext, IP);
     
     // Split into left and right halves
-    std::bitset<4> left, right;
+    bitset<4> left, right;
     for (int i = 0; i < 4; i++) {
         left[i] = permuted[i + 4];
         right[i] = permuted[i];
     }
     
     // Round 1: fK2 (reversed order)
-    std::bitset<4> f_output = fFunction(right, k2);
-    std::bitset<4> new_right = left ^ f_output;
-    std::bitset<4> new_left = right;
+    bitset<4> f_output = fFunction(right, k2);
+    bitset<4> new_right = left ^ f_output;
+    bitset<4> new_left = right;
     
     // Round 2: fK1
     f_output = fFunction(new_right, k1);
-    std::bitset<4> final_left = new_left ^ f_output;
-    std::bitset<4> final_right = new_right;
+    bitset<4> final_left = new_left ^ f_output;
+    bitset<4> final_right = new_right;
     
     // Combine halves
-    std::bitset<8> combined;
+    bitset<8> combined;
     for (int i = 0; i < 4; i++) {
         combined[i + 4] = final_left[i];
         combined[i] = final_right[i];
@@ -227,19 +229,19 @@ std::bitset<8> SDES::decrypt(const std::bitset<8>& ciphertext) {
     return permute8(combined, IP_INV);
 }
 
-bool SDES::encryptFile(const std::string& inputFile, const std::string& outputFile) {
-    std::ifstream inFile(inputFile, std::ios::binary);
-    std::ofstream outFile(outputFile, std::ios::binary);
+bool SDES::encryptFile(const string& inputFile, const string& outputFile) {
+    ifstream inFile(inputFile, ios::binary);
+    ofstream outFile(outputFile, ios::binary);
     
     if (!inFile.is_open() || !outFile.is_open()) {
-        std::cerr << "Error opening files!" << std::endl;
+        cerr << "Error opening files!" << endl;
         return false;
     }
     
     char ch;
     while (inFile.get(ch)) {
-        std::bitset<8> plaintext = charToBinary(ch);
-        std::bitset<8> ciphertext = encrypt(plaintext);
+        bitset<8> plaintext = charToBinary(ch);
+        bitset<8> ciphertext = encrypt(plaintext);
         
         // Convert bitset back to char and write
         char encrypted_char = static_cast<char>(ciphertext.to_ulong());
@@ -251,19 +253,19 @@ bool SDES::encryptFile(const std::string& inputFile, const std::string& outputFi
     return true;
 }
 
-bool SDES::decryptFile(const std::string& inputFile, const std::string& outputFile) {
-    std::ifstream inFile(inputFile, std::ios::binary);
-    std::ofstream outFile(outputFile, std::ios::binary);
+bool SDES::decryptFile(const string& inputFile, const string& outputFile) {
+    ifstream inFile(inputFile, ios::binary);
+    ofstream outFile(outputFile, ios::binary);
     
     if (!inFile.is_open() || !outFile.is_open()) {
-        std::cerr << "Error opening files!" << std::endl;
+        cerr << "Error opening files!" << endl;
         return false;
     }
     
     char ch;
     while (inFile.get(ch)) {
-        std::bitset<8> ciphertext = charToBinary(ch);
-        std::bitset<8> plaintext = decrypt(ciphertext);
+        bitset<8> ciphertext = charToBinary(ch);
+        bitset<8> plaintext = decrypt(ciphertext);
         
         // Convert bitset back to char and write
         char decrypted_char = static_cast<char>(plaintext.to_ulong());
@@ -275,10 +277,10 @@ bool SDES::decryptFile(const std::string& inputFile, const std::string& outputFi
     return true;
 }
 
-std::string SDES::binaryToString(const std::bitset<8>& bits) {
+string SDES::binaryToString(const bitset<8>& bits) {
     return bits.to_string();
 }
 
-std::bitset<8> SDES::charToBinary(char c) {
-    return std::bitset<8>(static_cast<unsigned char>(c));
+bitset<8> SDES::charToBinary(char c) {
+    return bitset<8>(static_cast<unsigned char>(c));
 }

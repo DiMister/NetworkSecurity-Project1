@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 class SDES {
 private:
     // P10 permutation table for 10-bit key
@@ -31,36 +33,36 @@ private:
     // S-Box 1
     static const int S1[4][4];
     
-    std::bitset<10> masterKey;
-    std::bitset<8> k1, k2;
+    bitset<10> masterKey;
+    bitset<8> k1, k2;
     
     // Helper functions
-    std::bitset<10> permute10(const std::bitset<10>& input, const int* table);
-    std::bitset<8> permute8(const std::bitset<8>& input, const int* table);
-    std::bitset<8> permute8(const std::bitset<10>& input, const int* table);
-    std::bitset<4> permute4(const std::bitset<4>& input, const int* table);
-    std::bitset<8> expandPermute(const std::bitset<4>& input);
-    std::bitset<10> leftShift(const std::bitset<10>& input, int positions);
-    std::bitset<2> sboxLookup(const std::bitset<4>& input, const int sbox[4][4]);
-    std::bitset<4> fFunction(const std::bitset<4>& right, const std::bitset<8>& subkey);
+    bitset<10> permute10(const bitset<10>& input, const int* table);
+    bitset<8> permute8(const bitset<8>& input, const int* table);
+    bitset<8> permute8(const bitset<10>& input, const int* table);
+    bitset<4> permute4(const bitset<4>& input, const int* table);
+    bitset<8> expandPermute(const bitset<4>& input);
+    bitset<10> leftShift(const bitset<10>& input, int positions);
+    bitset<2> sboxLookup(const bitset<4>& input, const int sbox[4][4]);
+    bitset<4> fFunction(const bitset<4>& right, const bitset<8>& subkey);
     
     void generateSubkeys();
     
 public:
     // Constructor
-    SDES(const std::bitset<10>& key);
+    SDES(const bitset<10>& key);
     
     // Main encryption/decryption functions
-    std::bitset<8> encrypt(const std::bitset<8>& plaintext);
-    std::bitset<8> decrypt(const std::bitset<8>& ciphertext);
+    bitset<8> encrypt(const bitset<8>& plaintext);
+    bitset<8> decrypt(const bitset<8>& ciphertext);
     
     // File operations
-    bool encryptFile(const std::string& inputFile, const std::string& outputFile);
-    bool decryptFile(const std::string& inputFile, const std::string& outputFile);
+    bool encryptFile(const string& inputFile, const string& outputFile);
+    bool decryptFile(const string& inputFile, const string& outputFile);
     
     // Utility functions
-    std::string binaryToString(const std::bitset<8>& bits);
-    std::bitset<8> charToBinary(char c);
+    string binaryToString(const bitset<8>& bits);
+    bitset<8> charToBinary(char c);
 };
 
 #endif // SDES_H
