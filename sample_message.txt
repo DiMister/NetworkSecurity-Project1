@@ -1,0 +1,7 @@
+Hello, World! This is a test message for SDES encryption.
+The Simplified Data Encryption Standard (SDES) is a simplified version of DES designed for educational purposes.
+This file contains various characters including numbers: 1234567890
+Special characters: !@#$%^&*()_+-=[]{}|;':\",./<>?
+Mixed case letters: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+
+This text file can be used to test the encryption and decryption functionality of the SDES implementation.

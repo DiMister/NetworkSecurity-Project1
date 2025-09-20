@@ -1,0 +1,7 @@
+Network Security Project 1
+SDES Implementation Test Data
+
+Test Key: 1010000010
+Expected behavior: Encryption and decryption should be inverse operations.
+
+Short text for testing.
