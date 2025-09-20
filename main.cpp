@@ -27,7 +27,8 @@ void decryptFile(SDES sdes, string inputFile, string outputFile) {
 int main() {    
     cout << "=== SDES File Encryption/Decryption ===" << endl;
 
-    bitset<10> key = 0111111111;
+    bitset<10> key = 0b1011111111;
+    cout << "Using key: " << key << endl;
     SDES sdes(key);
 
     encryptFile(sdes, "input.txt", "encrypted.txt");
